@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Class Maker — AI Lesson Studio</title>
+<style>
+:root{--ink:#20243a;--muted:#747b91;--line:#e8eaf2;--purple:#6558e8;--bg:#f7f8fc}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px Inter,system-ui,sans-serif}
+main{max-width:1100px;margin:35px auto;padding:0 20px}header{font-weight:800;font-size:20px;margin-bottom:35px}
+h1{font-size:42px;letter-spacing:-1.5px;margin:8px 0}p{color:var(--muted);line-height:1.6}
+.layout{display:grid;grid-template-columns:1.4fr .8fr;gap:20px}.panel{background:white;border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:0 15px 45px #282b4b0d}
+label{display:block;font-size:13px;font-weight:700;margin:15px 0 7px}input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font:inherit}textarea{min-height:130px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.drop{margin-top:8px;border:2px dashed #c9cbe2;border-radius:14px;padding:20px;text-align:center;background:#fafaff}
+.drop input{max-width:100%;margin-top:12px}.previews{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.preview{width:85px;height:85px;object-fit:cover;border-radius:10px}
+button,.download{display:inline-block;border:0;border-radius:12px;background:var(--purple);color:white;padding:14px 18px;font-weight:800;text-decoration:none;cursor:pointer}
+button{width:100%;margin-top:20px}.muted{font-size:12px;color:var(--muted)}.step{padding:13px 0;border-bottom:1px solid var(--line)}#status{margin-top:14px;font-size:13px}#result{display:none;margin-top:20px}.download{margin-top:10px}.previewText{white-space:pre-wrap;line-height:1.6}
+@media(max-width:760px){.layout{grid-template-columns:1fr}h1{font-size:34px}.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<header>✦ Class Maker</header>
+<p style="color:#6558e8;font-weight:800;letter-spacing:1px">AI LESSON STUDIO</p>
+<h1>Turn inspiration into<br>an unforgettable lesson.</h1>
+<p>Upload pictures, share your ideas and let AI create a structured, classroom-ready lesson PDF.</p>
+<div class="layout">
+<section class="panel"><h2>Build your lesson</h2><p>Tell the AI what you are teaching and what your class should experience.</p>
+<form id="lessonForm">
+<label>Lesson topic *</label><input name="topic" required placeholder="e.g. The water cycle">
+<div class="grid"><div><label>Subject</label><input name="subject" placeholder="Science"></div><div><label>Grade / year</label><select name="grade"><option>Kindergarten</option><option>Grade 1</option><option>Grade 2</option><option>Grade 3</option><option>Grade 4</option><option>Grade 5</option><option>Grade 6</option><option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option><option>Grade 11</option><option>Grade 12</option></select></div></div>
+<div class="grid"><div><label>Duration</label><select name="duration"><option>30 minutes</option><option selected>45 minutes</option><option>60 minutes</option><option>90 minutes</option><option>2 hours</option></select></div><div><label>Language</label><select name="language"><option>English</option><option>Arabic</option><option>English + Arabic</option></select></div></div>
+<div class="grid"><div><label>Teaching style</label><select name="style"><option>Engaging and interactive</option><option>Visual and creative</option><option>Project-based learning</option><option>Inquiry and discussion</option><option>Clear and structured</option></select></div><div><label>Difficulty</label><select name="difficulty"><option>Age appropriate</option><option>Beginner</option><option>Standard</option><option>Advanced</option></select></div></div>
+<label>Notes and instructions *</label><textarea name="instructions" required placeholder="Learning goals, key points, activities, examples, things to avoid..."></textarea>
+<label>Inspiration pictures</label><div class="drop"><strong>Drop images here or choose files</strong><p class="muted">PNG, JPG or WEBP · Up to 8 images, 8 MB each</p><input id="images" type="file" accept="image/png,image/jpeg,image/webp" multiple></div><div class="previews" id="previews"></div>
+<button id="generate" type="submit">✦ Generate my lesson PDF</button><div id="status" role="status"></div>
+</form><div id="result" class="panel"><h3>Your lesson is ready</h3><div class="previewText" id="previewText"></div><a class="download" id="download" download="class-maker-lesson.pdf">Download PDF</a></div>
+</section>
+<aside class="panel"><h2>How it works</h2><div class="step"><b>1. Share your vision</b><p>Choose the topic, grade, duration and style.</p></div><div class="step"><b>2. Add inspiration</b><p>Upload worksheets, screenshots and visual references.</p></div><div class="step"><b>3. Let AI plan it</b><p>Generate objectives, explanations, activities and checks for understanding.</p></div><div class="step"><b>4. Download and teach</b><p>Review your lesson and download the printable PDF.</p></div>
+<label for="backend">Backend base URL</label><input id="backend" type="url" placeholder="https://your-backend.example.com"><p class="muted">Request endpoint: <code>/api/class-maker/generate</code>. Paste your deployed backend URL here once it is ready.</p></aside>
+</div></main>
+<script>
+const form=document.querySelector('#lessonForm'), input=document.querySelector('#images'), previews=document.querySelector('#previews');
+let files=[];
+input.addEventListener('change',()=>{const added=[...input.files];for(const f of added){if(files.length>=8)break;if(!['image/jpeg','image/png','image/webp'].includes(f.type)||f.size>8*1024*1024)continue;if(!files.some(x=>x.name===f.name&&x.size===f.size))files.push(f)}render();input.value=''});
+function render(){previews.replaceChildren();files.forEach((f,i)=>{const wrap=document.createElement('div'),img=document.createElement('img'),btn=document.createElement('button');img.src=URL.createObjectURL(f);img.className='preview';img.alt=f.name;btn.type='button';btn.textContent='Remove';btn.style.cssText='display:block;width:auto;padding:5px;margin:4px 0';btn.onclick=()=>{files.splice(i,1);render()};wrap.append(img,btn);previews.append(wrap)})}
+function pdfBlobFromBase64(s){const b=atob(s.includes(',')?s.split(',').pop():s),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new Blob([a],{type:'application/pdf'})}
+form.addEventListener('submit',async e=>{e.preventDefault();const base=document.querySelector('#backend').value.trim(),status=document.querySelector('#status'),btn=document.querySelector('#generate');if(!form.reportValidity())return;if(!base){status.textContent='Please enter your backend URL first.';return}
+let url;try{url=new URL(base)}catch{status.textContent='Enter a valid backend URL including https://';return}if(url.protocol!=='https:'&&url.hostname!=='localhost'&&url.hostname!=='127.0.0.1'){status.textContent='Use https:// for a deployed backend.';return}
+const data=new FormData(form);data.delete('');files.forEach(f=>data.append('images',f,f.name));btn.disabled=true;btn.textContent='Creating your lesson…';status.textContent='Sending your lesson details and images to the AI…';
+try{const response=await fetch(url.origin+'/api/class-maker/generate',{method:'POST',body:data,headers:{Accept:'application/pdf, application/json'}});if(!response.ok){let msg=`Server error (${response.status})`;try{const j=await response.json();msg=j.detail||j.error||j.message||msg}catch{}throw Error(msg)}
+const type=(response.headers.get('content-type')||'').toLowerCase();let blob,lesson='Your PDF is ready. Download it to view the complete lesson.';
+if(type.includes('application/pdf')||type.includes('application/octet-stream'))blob=await response.blob();else{const j=await response.json();if(j.pdfBase64||j.pdf_base64)blob=pdfBlobFromBase64(j.pdfBase64||j.pdf_base64);else if(j.pdfUrl||j.pdf_url){const r=await fetch(new URL(j.pdfUrl||j.pdf_url,response.url));if(!r.ok)throw Error('PDF download link failed');blob=await r.blob()}else throw Error('Backend response must contain a PDF, pdfBase64 or pdfUrl.');lesson=j.lessonText||j.lesson||j.preview||lesson}
+const link=document.querySelector('#download');link.href=URL.createObjectURL(blob);link.download='class-maker-lesson.pdf';document.querySelector('#previewText').textContent=lesson;document.querySelector('#result').style.display='block';status.textContent='Lesson generated successfully.';
+}catch(err){status.textContent=(err instanceof TypeError?'Could not reach backend. Check the URL and CORS settings. ': '')+err.message}
+finally{btn.disabled=false;btn.textContent='✦ Generate my lesson PDF'}
+});
+</script></body></html>
